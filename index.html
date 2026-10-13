@@ -209,6 +209,22 @@ mark{background:var(--stamp-soft);color:var(--stamp);padding:0 2px;border-radius
 .gloss dd{margin:2px 0 0;color:var(--muted);max-width:65ch}
 .foot{margin-top:48px;padding-top:14px;border-top:1px solid var(--line);font-family:var(--f-display);font-size:13px;color:var(--muted)}
 .results .where .n{font-family:var(--f-mono);color:var(--stamp)}
+.askbar{display:flex;gap:8px;margin:20px 0 14px}
+.askbar input{flex:1;min-width:0;font-family:var(--f-display);font-size:17px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.askbar input:focus{outline:none;border-color:var(--accent)}
+.askbar button{font-family:var(--f-display);font-weight:600;font-size:16px;padding:0 20px;border:0;border-radius:8px;background:var(--accent);color:var(--surface);cursor:pointer}
+.askout{display:flex;flex-direction:column;gap:22px;margin-top:26px}
+.ans .q{font-family:var(--f-display);font-weight:600;font-size:18px;margin-bottom:10px}
+.ans .q::before{content:"Q  ";color:var(--stamp);font-family:var(--f-mono);font-size:14px}
+.quote{border-left:3px solid var(--accent);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px}
+.quote .prose p{margin:8px 0}
+.cite{display:inline-flex;gap:8px;align-items:baseline;background:none;border:0;padding:0;cursor:pointer;font-family:var(--f-display);font-size:15px;font-weight:600;color:var(--accent);text-align:left}
+.cite .n{font-family:var(--f-mono);font-size:13px;color:var(--stamp);font-weight:500}
+.also{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.also .cite{font-weight:500}
+.warnline{font-family:var(--f-display);font-size:14px;color:var(--stamp);margin:0 0 8px}
+.askbtn{font-family:var(--f-display);font-size:14px;font-weight:600;border:0;border-radius:8px;padding:9px 14px;background:var(--accent);color:var(--surface);cursor:pointer;white-space:nowrap}
+@media (max-width:860px){.tabbar{grid-template-columns:repeat(5,1fr)!important}}
 </style>
 
 </head>
@@ -226,6 +242,7 @@ mark{background:var(--stamp-soft);color:var(--stamp);padding:0 2px;border-radius
         <input id="q" type="search" placeholder="Search: e.g. body search, fast track, firearms" autocomplete="off">
         <kbd class="hide-sm">/</kbd>
       </label>
+      <button class="askbtn hide-sm" data-tab="ask">Ask the manual</button>
       <select class="pill hide-sm" id="lang" aria-label="Language">
         <option>English</option><option disabled>Kiswahili (planned)</option><option disabled>Français (planned)</option><option disabled>Ikinyarwanda (planned)</option>
       </select>
@@ -236,6 +253,7 @@ mark{background:var(--stamp-soft);color:var(--stamp);padding:0 2px;border-radius
 </div>
 <nav class="tabbar" aria-label="Sections">
   <button data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Manual</button>
+  <button data-tab="ask"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.4"/></svg>Ask</button>
   <button data-tab="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button>
   <button data-tab="glossary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>Terms</button>
   <button data-tab="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Saved</button>
@@ -316,6 +334,7 @@ function home(){
     <h1>One-Stop Border Posts Procedures Manual</h1>
     <p class="lede">The EAC manual as a searchable field reference. Browse by chapter, search any procedure, tap a defined term for its meaning, and follow links to related sections.</p></div>
    <div class="stats"><div><b>${CH.length}</b>chapters</div><div><b>${SEC.length}</b>sections</div><div><b>${G.length}</b>defined terms</div><div><b>3</b>clearance flows</div></div>
+   <form class="askbar" id="homeAsk" style="margin:0"><input id="homeAskQ" type="text" placeholder="Ask a question, e.g. Who gets fast track clearance?" aria-label="Ask the manual" autocomplete="off"><button type="submit">Ask</button></form>
    <section class="stack" style="gap:12px"><h2>Show sections for</h2>
     <div class="roles">${Object.entries(A).map(([k,v])=>`<button class="chip" data-aud="${k}" aria-pressed="${aud===k}">${v}</button>`).join("")}</div>
     ${aud?`<ul class="sublist">${list.map(rowHtml).join("")}</ul>`:""}</section>
@@ -332,6 +351,7 @@ function home(){
     </div></section>
    ${foot}
   </div>`;
+  $("#homeAsk").addEventListener("submit",e=>{e.preventDefault();const q=$("#homeAskQ").value.trim();if(q)ask(q)});
 }
 
 function chapter(n){
@@ -419,6 +439,79 @@ function savedView(){
    ${list.length?`<ul class="sublist" style="margin-top:24px">${list.map(rowHtml).join("")}</ul>`:`<div class="quick" style="margin-top:20px">${QUICK.slice(0,2).map(id=>`<button data-go="s${id}"><span class="n">${id}</span>${esc(byId[id].title)}</button>`).join("")}</div>`}`;
 }
 
+/* ---------- Ask the manual: offline question answering ----------
+   Retrieval only: finds the clauses that best answer a question (BM25 over
+   clause-sized passages) and quotes them with their section number. Nothing is
+   generated, so every answer is the manual's own wording. */
+const STOP=new Set("a an the and or of to in on at for by with from is are was were be been being do does did can could shall should may might must will would what which who whom whose when where why how i me my we our you your it its this that these those there here if then than as into about any all some such not no yes please tell need want get give".split(" "));
+const SYN={kid:"minor",kids:"minor",child:"minor",children:"minor",baby:"infant",babies:"infant",car:"vehicle",cars:"vehicle",truck:"vehicle",lorry:"vehicle",bus:"vehicle",gun:"arm",guns:"arm",firearm:"arm",firearms:"arm",weapon:"arm",weapons:"arm",sick:"health",ill:"health",disease:"health",passport:"document",id:"identification",cop:"police",police:"police",bribe:"conduct",corruption:"conduct",open:"operat",opening:"operat",hours:"hour",time:"hour",agent:"agent",agents:"agent",broker:"agent",clearing:"agent",goods:"good",cargo:"good",fees:"payment",fee:"payment",pay:"payment",tax:"duty",taxes:"duty",duties:"duty",search:"search",searched:"search",frisk:"search",refuse:"deni",refused:"deni",deny:"deni",denied:"deni",arrest:"arrest",arrested:"arrest",crime:"offence",crimes:"offence",committee:"committe",committees:"committe",vip:"vip",diplomat:"diplomatic",diplomats:"diplomatic",emergency:"emergenc",accident:"incident",accidents:"incident",fire:"incident",dangerous:"hazardous",chemicals:"hazardous",food:"perishable",perishables:"perishable",traveller:"person",travellers:"person",traveler:"person",travelers:"person",passenger:"person",passengers:"person",people:"person",persons:"person",electricity:"utility",power:"utility",water:"utility",utilities:"utility",bills:"cost",bill:"cost",pays:"cost",cost:"cost",costs:"cost",meet:"meeting",meets:"meeting",meetings:"meeting",accompanied:"accompani"};
+function stem(w){w=SYN[w]||w;if(w.length>4){w=w.replace(/ies$/,"y");w=w.replace(/(ations?|ings?|ied|ed|es|s|ly)$/,"")}return SYN[w]||w}
+function toks(t){return t.toLowerCase().replace(/[’']/g,"").split(/[^a-z0-9]+/).filter(w=>w&&!STOP.has(w)).map(stem)}
+const CHUNKS=[];
+SEC.forEach(s=>{
+  let cur=null;
+  const minLv=Math.min(...s.blocks.filter(b=>b.t==="li").map(b=>b.lv),9);
+  s.blocks.forEach(b=>{
+    if(b.t==="flow"||b.t==="note"){cur=null;return}
+    if(b.t==="h"){cur=null;return}
+    const lead=b.t==="p"||(b.t==="li"&&b.lv<=minLv);
+    const prevEndsColon=cur&&/:\s*$/.test(cur.parts[cur.parts.length-1].text);
+    if(!cur||(lead&&!prevEndsColon)){cur={s,anchor:b.anchor,parts:[]};CHUNKS.push(cur)}
+    cur.parts.push(b);
+  });
+});
+CHUNKS.forEach(c=>{
+  const head=c.anchor===c.s.id?c.s.title:(c.s.blocks.find(b=>b.t==="h"&&b.id===c.anchor)||{}).text||c.s.title;
+  c.head=head;
+  const words=toks(c.parts.map(p=>p.text).join(" "));
+  const hw=toks(head), sw=head===c.s.title?[]:toks(c.s.title);
+  c.tf={};words.forEach(w=>c.tf[w]=(c.tf[w]||0)+1);hw.forEach(w=>c.tf[w]=(c.tf[w]||0)+3);sw.forEach(w=>c.tf[w]=(c.tf[w]||0)+1);
+  c.len=words.length+hw.length*3+sw.length;
+});
+const AVG=CHUNKS.reduce((a,c)=>a+c.len,0)/CHUNKS.length, DF={};
+CHUNKS.forEach(c=>Object.keys(c.tf).forEach(w=>DF[w]=(DF[w]||0)+1));
+function answer(q){
+  const qt=[...new Set(toks(q))];if(!qt.length)return[];
+  const k1=1.3,b=.7,N=CHUNKS.length;
+  const ranked=CHUNKS.map(c=>{let sc=0,hit=0;qt.forEach(w=>{const f=c.tf[w];if(!f)return;hit++;const idf=Math.log(1+(N-DF[w]+.5)/(DF[w]+.5));sc+=idf*f*(k1+1)/(f+k1*(1-b+b*c.len/AVG))});
+    const cov=hit/qt.length;return{c,cov,sc:sc*cov*cov}}).filter(r=>r.sc>0).sort((x,y)=>y.sc-x.sc);
+  /* Group passages by sub-section so a sub-section that answers in several clauses ranks above a stray mention. */
+  const g=new Map();ranked.forEach(r=>{const k=r.c.s.id+"|"+r.c.anchor;if(!g.has(k))g.set(k,[]);g.get(k).push(r)});
+  return [...g.values()].map(rs=>({c:rs[0].c,more:rs.slice(1,2).filter(x=>x.sc>rs[0].sc*.6).map(x=>x.c),cov:rs[0].cov,sc:rs[0].sc+.5*(rs[1]?rs[1].sc:0)})).sort((x,y)=>y.sc-x.sc);
+}
+const ASK_SAMPLES=["Can a female traveller be searched by a male officer?","Who gets fast track clearance?","Can officers carry guns in the control zone?","What documents does a traveller need?","What happens if an officer commits a crime in the other country?","How are perishable goods handled?"];
+let askLog=[];
+function chunkHtml(c,qt,full){
+  const seen=new Set();
+  return c.parts.map(p=>p.t==="li"?`<div class="li lv${p.lv}"><span class="mk">(${esc(p.mk)})</span><div>${hlStem(p.text,qt)}</div></div>`:`<p>${hlStem(p.text,qt)}</p>`).slice(0,full?99:6).join("");
+}
+function hlStem(text,qt){return esc(text).replace(/[A-Za-z][A-Za-z’']+/g,w=>qt.includes(stem(w.toLowerCase().replace(/[’']/g,"")))&&!STOP.has(w.toLowerCase())?`<mark>${w}</mark>`:w)}
+function askView(){
+  view.innerHTML=`<div class="eyebrow">Ask the manual · works offline</div><h1>Quick answers</h1>
+   <p class="lede">Ask a question in plain words. The answer is quoted from the manual with its section number, so you can check it and cite it.</p>
+   <form id="askForm" class="askbar"><input id="askQ" type="text" placeholder="e.g. Can officers carry guns in the control zone?" autocomplete="off" aria-label="Your question"><button type="submit">Ask</button></form>
+   <div class="roles" id="askSugg">${ASK_SAMPLES.map(s=>`<button class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+   <div id="askOut" class="askout">${askLog.map(renderAns).join("")}</div>
+   <p class="foot">Answers are retrieved from the manual text on this device and quoted word for word. Nothing is generated or sent to a server. Check the full section before acting on an answer.</p>`;
+  $("#askForm").addEventListener("submit",e=>{e.preventDefault();const q=$("#askQ").value.trim();if(q)ask(q)});
+}
+function ask(q){
+  const qt=[...new Set(toks(q))], res=answer(q);
+  askLog.unshift({q,qt,res:res.slice(0,4)});askLog=askLog.slice(0,5);
+  if(cur!=="ask")go("ask");else{$("#askOut").innerHTML=askLog.map(renderAns).join("");$("#askQ").value=""}
+  const out=$("#askOut");if(out&&window.innerWidth<860)out.scrollIntoView({block:"start"});
+}
+function renderAns(a){
+  const top=a.res[0], weak=!top||top.sc<3||top.cov<.6;
+  const cite=r=>`<button class="cite" data-go="s${r.c.s.id}" data-anchor="${r.c.anchor!==r.c.s.id?r.c.anchor:""}"><span class="n">§ ${r.c.anchor}</span> ${esc(r.c.head)}</button>`;
+  return `<article class="ans"><div class="q">${esc(a.q)}</div>
+   ${!top?`<p class="empty">The manual doesn't seem to cover that. Try other words, or browse the chapters.</p>`:
+   `${weak?`<p class="warnline">Closest match only. The manual may not answer this directly.</p>`:""}
+    <div class="quote">${cite(top)}<div class="prose">${[top.c,...top.more].map(c=>chunkHtml(c,a.qt)).join("")}</div></div>
+    ${a.res.length>1?`<div class="also"><span class="eyebrow">Also relevant</span>${a.res.slice(1,4).map(cite).join("")}</div>`:""}`}
+  </article>`;
+}
+
 /* ---------- Router ---------- */
 let cur="home";
 function go(r,anchor){
@@ -426,6 +519,7 @@ function go(r,anchor){
   if(r==="home")home();
   else if(r==="search")search($("#q").value);
   else if(r==="saved")savedView();
+  else if(r==="ask")askView();
   else if(r==="glossary")anchored=glossary(anchor);
   else if(/^c\d+$/.test(r)&&CH[+r.slice(1)-1])chapter(+r.slice(1));
   else if(/^s[\d.]+$/.test(r)&&byId[r.slice(1)])anchored=section(r.slice(1),anchor);
@@ -449,9 +543,10 @@ function openPop(btn){
   pop.style.top=(window.scrollY+r.bottom+8)+"px";
 }
 document.addEventListener("click",e=>{
-  const g=e.target.closest("[data-go],[data-tab],[data-aud],[data-save],[data-q],[data-term],[data-flowtab]");
+  const g=e.target.closest("[data-ask],[data-go],[data-tab],[data-aud],[data-save],[data-q],[data-term],[data-flowtab]");
   if(!g){closePop();if($("#rail").classList.contains("open")&&!e.target.closest("#rail,#menuBtn"))$("#rail").classList.remove("open");return}
   if(g.dataset.term){openPop(g);return}
+  if(g.dataset.ask){ask(g.dataset.ask);return}
   if(g.dataset.go)go(g.dataset.go,g.dataset.anchor);
   else if(g.dataset.tab){if(g.dataset.tab==="search"){go("search");$("#q").focus()}else go(g.dataset.tab)}
   else if(g.dataset.aud){aud=aud===g.dataset.aud?null:g.dataset.aud;store.set("osbp-aud",aud);home()}

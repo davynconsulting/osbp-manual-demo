@@ -1,5 +1,5 @@
 // Offline cache for the OSBP manual. Bump VERSION whenever the content changes.
-const VERSION = "osbp-v1";
+const VERSION = "osbp-v2";
 const CORE = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
